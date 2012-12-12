@@ -1,0 +1,43 @@
+################################################################################
+#####======================================================================#####
+#####                                                                      #####
+#####   IDENTIFICAÇÃO                                                      #####
+#####                                                                      #####
+#####======================================================================#####
+################################################################################
+
+### DEFINIÇÃO DO LOCAL DE TRABALHO E VARIÁVEIS DE AMBIENTE
+setwd('I:\\Mestrado ENCE 2012\\03 - Amostragem\\TrabalhoFinal\\')
+options(width=180)
+
+### CARREGANDO OS PACOTES NECESSÁRIOS
+library(xlsReadWrite)
+library(SOAR)
+library(survey)
+
+
+### LEITURA DOS DADOS
+## Inicialmente o arquivo estava em formato .xlsx e foi convertido no Excel 2010
+## para o .xls
+classcol = c(rep('character',5),rep('numeric',2),rep('character',2))
+munic <- read.xls('Munic1.xls',colClasses=classcol)
+rm(classcol)
+str(munic)
+
+
+
+### ITEM 1 - Use os valores populacionais das variáveis de interesse para
+### determinar o CV esperado para os estimadores dos parâmetros de interesse.
+
+#Y1 = FuncADMD    - Total de funcionários ativos da administração direta;
+#Y2 = Maternidade - Existe Maternidade no município?
+#Y3 = Emergencia  - Existe Unidade de emergência no município?
+munic <- transform(munic,
+            func =FuncADMD,
+            mater=ifelse(Maternidade=="Sim",1,ifelse(Maternidade=='Não',0,NA)),
+            emerg=ifelse(Emergencia=="Sim",1,ifelse(Emergencia=='Não',0,NA)))
+munic[1:10,]
+varint <- c('func','mater','emerg')
+(medPop <- apply(munic[,varint],2,mean,na.rm=T))
+(varPop <- apply(munic[,varint],2,var,na.rm=T))
+
