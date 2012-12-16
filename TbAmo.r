@@ -47,15 +47,19 @@ munic <- transform(munic,
             FuncADMD=as.integer(FuncADMD),
             Regiao=substr(CodMunic,1,1))
 munic <- transform(munic,
-            e1_func  = FuncADMD,
-            e2_raz   = Populacao/FuncADMD,
-            e3_mater = ifelse(Maternidade=="Sim",1,ifelse(Maternidade=='Não',0,NA)),
+            mater = ifelse(Maternidade=="Sim",1,ifelse(Maternidade=='Não',0,NA)),
             emerg    = ifelse(Emergencia=="Sim",1,ifelse(Emergencia=='Não',0,NA)))
 munic <- transform(munic,
-            e4_materemerg = ifelse(rowSums(cbind(e3_mater,emerg)) == 2,1,0))
+            materemerg = ifelse(rowSums(cbind(mater,emerg)) == 2,1,0))
+munic <- munic[rowSums(is.na(munic))==0,]
+dim(munic)
 munic[1:10,]
 
 
+
+
+sum(munic$Populacao)/sum(munic$FuncADMD)
+munic$Populacao/munic$FuncADMD
 
 
 varint <- c('e1_func','e2_raz','e3_mater','e4_materemerg')
@@ -71,3 +75,4 @@ varint <- c('e1_func','e2_raz','e3_mater','e4_materemerg')
 ### qual deles vocÃª escolheria, justificando sua escolha.
 
 ## PLANO 1
+                    
