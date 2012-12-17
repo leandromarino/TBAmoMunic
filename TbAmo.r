@@ -68,9 +68,9 @@ munic[1:10,]
 
 ### PLANO 1 - AAS
 ### PLANO 2 - AES de Munic por Reg com Aloc igual
-### PLANO 3 - AES de Munic por Pop talque sqrt(Estrado_i) == sqrt(Estrato_j) 
+### PLANO 3 -   AES de Munic por Pop talque sqrt(Estrado_i) == sqrt(Estrato_j) 
 ###           \forall i,j \in 1:5
-### PLANO 4 - AES por 'corte' pi = 1 se pop >= 500.000, aas nos demais
+### PLANO 4 - AES por 'corte' pi = 1 se pop >= 500.000 e cap, aas nos demais
 ### PLANO 5 - AAS com uso do estimador de razao usando var aux o tot da pop
 
 
@@ -153,6 +153,75 @@ materemerg <- split(munic$materemerg,estrato)
 var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest)
 (p2d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
 (p2d.cv <- sqrt(p2d.var)/p2d.prop)   
+
+
+
+
+
+
+
+
+#######################
+## Plano 3
+#######################
+estrato <- munic$Regiao
+(Nest <- matrix(table(estrato),ncol=5))
+(nest <- rep(200/5,5))
+(Wh <- Nest/N)
+est.munic <- split(munic,factor(estrato))
+
+#   a) Total de funcionários ativos da administração direta
+func <- split(munic$FuncADMD,estrato)
+(tot.est <- do.call(c,lapply(func,sum)))
+(p2a.tot <- sum(tot.est))
+(var.intra <- do.call(c,lapply(func,var)))
+(p2a.var <- N^2  * sum(Wh^2 * (1/nest - 1/Nest)*var.intra))
+(p2a.cv <- sqrt(p2a.var)/p2a.tot)
+
+
+#   b) Razão da população por funcionário ativo da administração direta;
+#### ver no cochran
+#med = mean(munic$FuncADMD)
+#(p2b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
+#(p2b.var <- (1-f)/(n*med^2)*1/(N-1)*sum(munic$Populacao-p2b.raz*munic$FuncADMD)^2)
+#(p2b.cv <- sqrt(p2b.var)/p2b.raz)
+
+
+#   c) Proporção de municípios com maternidade;
+mater <- split(munic$mater,estrato)
+(prop.est <- do.call(c,lapply(mater,mean)))
+(p2c.prop <- sum(Wh*prop.est))
+var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest)
+(p2c.var <-  sum(Wh^2 * (1/nest - 1/Nest)*var.intra))
+(p2c.cv <- sqrt(p2c.var)/p2c.prop)   
+
+#   d) Proporção de municípios com maternidade e emergência.
+materemerg <- split(munic$materemerg,estrato)
+(prop.est <- do.call(c,lapply(materemerg,mean)))
+(p2d.prop <- sum(Wh*prop.est))
+var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest)
+(p2d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
+(p2d.cv <- sqrt(p2d.var)/p2d.prop)   
+
+
+
+
+
+
+
+
+
+capitais <- c('1100205','1200401','1302603','1400100','1501402','1600303',
+              '1721000','2111300','2211001','2304400','2408102','2507507',
+              '2611606','2704302','2800308','2927408','3106200','3205309',
+              '3304557','3550308','4106902','4205407','4314902','5002704',
+              '5103403','5208707','5300108')
+estratocerto <- rep(0,nrow(munic))
+estratocerto[is.element(munic$CodMunic,substr(capitais,1,6))] <- 1
+estratocerto[munic$Populacao >= 500000] <- 1
+table(estratocerto)
+
+
 
 
 
