@@ -53,11 +53,16 @@ munic <- transform(munic,
             emerg    = ifelse(Emergencia=="Sim",1,ifelse(Emergencia=='Não',0,NA)))
 munic <- transform(munic,
             materemerg = ifelse(rowSums(cbind(mater,emerg)) == 2,1,0))
+munic.exc <- munic[rowSums(is.na(munic))!=0,]
 munic <- munic[rowSums(is.na(munic))==0,]
 dim(munic)
 munic[1:10,]
 
-
+for( i in 1:5){
+print( sum(munic.exc[munic.exc$Regiao==i,'Populacao']) /
+      (sum(munic.exc[munic.exc$Regiao==i,'Populacao']) +
+       sum(munic[munic$Regiao==i,'Populacao'])) *100)
+}
 
 
 
