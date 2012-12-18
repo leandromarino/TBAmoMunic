@@ -118,7 +118,9 @@ med = mean(munic$FuncADMD)
 estrato <- munic$Regiao
 (Nest <- matrix(table(estrato),ncol=5))
 (nest <- rep(200/5,5))
+(fest <- nest/Nest)
 (Wh <- Nest/N)
+
 est.munic <- split(munic,factor(estrato))
 
 #   a) Total de funcionários ativos da administração direta
@@ -131,11 +133,30 @@ func <- split(munic$FuncADMD,estrato)
 
 
 #   b) Razão da população por funcionário ativo da administração direta;
-#### ver no cochran
-#med = mean(munic$FuncADMD)
-#(p2b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
-#(p2b.var <- (1-f)/(n*med^2)*1/(N-1)*sum(munic$Populacao-p2b.raz*munic$FuncADMD)^2)
+func <- split(munic$FuncADMD,estrato)
+pop <-  split(munic$Populacao,estrato)
+(p2b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
+(raz.est <- do.call(c,lapply(pop,sum))/do.call(c,lapply(func,sum)))
+(medest <- do.call(c,lapply(func,mean)))
+#p2b.var <- list()
+#for( i in 1:5) {
+#p2b.var[[i]] <- (1-fest[i])/(nest[i]*medest[i]^2)*1/(Nest[i]-1)*
+#             sum((pop[[i]]-raz.est[i]*func[[i]])^2)
+#}
+#p2b.var <- do.call(c,p2b.var)
+#p2b.var <- sum(p2b.var)
 #(p2b.cv <- sqrt(p2b.var)/p2b.raz)
+(X <- sum(munic$FuncADMD))
+(var.intraX <- do.call(c,lapply(func,var)))
+(var.intraY <- do.call(c,lapply(pop,var))) 
+(sd.intraX <- sqrt(var.intraX))
+(sd.intraY <- sqrt(var.intraY))
+cor.XY <- list()
+for(i in 1:5) cor.XY[[i]] <- cor(func[[i]],pop[[i]])
+(cor.XY <- do.call(c,cor.XY)) 
+(p2b.var <- (1/X^2) * sum(Nest^2 * (1- fest)/nest * (var.intraY + 
+         raz.est^2*var.intraX - 2 * raz.est * sd.intraY * sd.intraX * cor.XY)))
+(p2b.cv <- sqrt(p2b.var)/p2b.raz)
 
 
 #   c) Proporção de municípios com maternidade;
@@ -153,10 +174,6 @@ materemerg <- split(munic$materemerg,estrato)
 (var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest))
 (p2d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
 (p2d.cv <- sqrt(p2d.var)/p2d.prop)   
-
-
-
-
 
 
 
@@ -194,11 +211,30 @@ func <- split(munic$FuncADMD,estrato)
 
 
 #   b) Razão da população por funcionário ativo da administração direta;
-#### ver no cochran
-#med = mean(munic$FuncADMD)
-#(p3b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
-#(p3b.var <- (1-f)/(n*med^2)*1/(N-1)*sum(munic$Populacao-p3b.raz*munic$FuncADMD)^2)
+func <- split(munic$FuncADMD,estrato)
+pop <-  split(munic$Populacao,estrato)
+(p3b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
+(raz.est <- do.call(c,lapply(pop,sum))/do.call(c,lapply(func,sum)))
+(medest <- do.call(c,lapply(func,mean)))
+#p3b.var <- list()
+#for( i in 1:5) {
+#p3b.var[[i]] <- (1-fest[i])/(nest[i]*medest[i]^2)*1/(Nest[i]-1)*
+#             sum((pop[[i]]-raz.est[i]*func[[i]])^2)
+#}
+#p3b.var <- do.call(c,p3b.var)
+#p3b.var <- sum(p3b.var)
 #(p3b.cv <- sqrt(p3b.var)/p3b.raz)
+(X <- sum(munic$FuncADMD))
+(var.intraX <- do.call(c,lapply(func,var)))
+(var.intraY <- do.call(c,lapply(pop,var))) 
+(sd.intraX <- sqrt(var.intraX))
+(sd.intraY <- sqrt(var.intraY))
+cor.XY <- list()
+for(i in 1:5) cor.XY[[i]] <- cor(func[[i]],pop[[i]])
+(cor.XY <- do.call(c,cor.XY)) 
+(p3b.var <- (1/X^2) * sum(Nest^2 * (1- fest)/nest * (var.intraY + 
+         raz.est^2*var.intraX - 2 * raz.est * sd.intraY * sd.intraX * cor.XY)))
+(p3b.cv <- sqrt(p3b.var)/p3b.raz)
 
 
 #   c) Proporção de municípios com maternidade;
@@ -295,8 +331,8 @@ med = mean(munic$FuncADMD)
 
 
 resumo <- data.frame(plano = paste('Plano',1:5),
-                     parametro_a=round(c(p1a.cv,p2a.cv,p3a.cv,p4a.cv,p5a.cv),4),
-                     parametro_b=round(c(p1b.cv,p2b.cv,p3b.cv,p4b.cv,p5b.cv),4),
-                     parametro_c=round(c(p1c.cv,p2c.cv,p3c.cv,p4c.cv,p5c.cv),4),
-                     parametro_d=round(c(p1d.cv,p2d.cv,p3d.cv,p4d.cv,p5d.cv),4))
+                     parametro_a=round(c(p1a.cv,p2a.cv,p3a.cv,p4a.cv,p5a.cv)*100,4),
+                     parametro_b=round(c(p1b.cv,p2b.cv,p3b.cv,p4b.cv,p5b.cv)*100,4),
+                     parametro_c=round(c(p1c.cv,p2c.cv,p3c.cv,p4c.cv,p5c.cv)*100,4),
+                     parametro_d=round(c(p1d.cv,p2d.cv,p3d.cv,p4d.cv,p5d.cv)*100,4))
 resumo
