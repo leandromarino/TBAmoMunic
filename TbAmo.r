@@ -283,8 +283,6 @@ n <- nest
 (p4a.tot <- sum(munic$FuncADMD))
 (p4a.cv <- sqrt(p4a.var)/p4a.tot)
 
-(p4a.tot <- sum(munic$FuncADMD[aux]))
-(p4a.cv <- sqrt(p4a.var)/p4a.tot)
 
 #   b) Razão da população por funcionário ativo da administração direta;
 med = mean(munic$FuncADMD)
