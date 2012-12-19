@@ -142,7 +142,7 @@ func <- split(munic$FuncADMD,estrato)
 func <- split(munic$FuncADMD,estrato)
 pop <-  split(munic$Populacao,estrato)
 (p2b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
-(raz.est <- do.call(c,lapply(pop,sum))/do.call(c,lapply(func,sum)))
+(raz.est <- p2b.raz)
 (medest <- do.call(c,lapply(func,mean)))
 (X <- sum(munic$FuncADMD))
 (var.intraX <- do.call(c,lapply(func,var)))
@@ -212,7 +212,7 @@ func <- split(munic$FuncADMD,estrato)
 func <- split(munic$FuncADMD,estrato)
 pop <-  split(munic$Populacao,estrato)
 (p3b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
-(raz.est <- do.call(c,lapply(pop,sum))/do.call(c,lapply(func,sum)))
+(raz.est <- p3b.raz)
 (medest <- do.call(c,lapply(func,mean)))
 (X <- sum(munic$FuncADMD))
 (var.intraX <- do.call(c,lapply(func,var)))
@@ -354,10 +354,10 @@ Y <- munic$materemerg
 
 
 resumo <- data.frame(plano = paste('Plano',1:5),
-                     parametro_a=round(c(p1a.cv,p2a.cv,p3a.cv,p4a.cv,p5a.cv)*100,4),
-                     parametro_b=round(c(p1b.cv,p2b.cv,p3b.cv,p4b.cv,p5b.cv)*100,4),
-                     parametro_c=round(c(p1c.cv,p2c.cv,p3c.cv,p4c.cv,p5c.cv)*100,4),
-                     parametro_d=round(c(p1d.cv,p2d.cv,p3d.cv,p4d.cv,p5d.cv)*100,4))
+                     parametro_a=c(p1a.cv,p2a.cv,p3a.cv,p4a.cv,p5a.cv)*100,
+                     parametro_b=c(p1b.cv,p2b.cv,p3b.cv,p4b.cv,p5b.cv)*100,
+                     parametro_c=c(p1c.cv,p2c.cv,p3c.cv,p4c.cv,p5c.cv)*100,
+                     parametro_d=c(p1d.cv,p2d.cv,p3d.cv,p4d.cv,p5d.cv)*100)
 resumo
 
 epas <- resumo[-1,]
@@ -365,3 +365,104 @@ for(i in 1:4){
 epas[i,2:5] <- resumo[i+1,2:5] / resumo[1,2:5]
 }
 epas
+
+
+#write.xls(resumo,'c:/Projetos/TbAmoMunic/trunk/cvs.xls')
+#write.xls(epas,'c:/Projetos/TbAmoMunic/trunk/epas.xls')
+
+
+
+
+#####----------------------------------------------------------------------#####
+#####----------------------------------------------------------------------#####
+### ITEM 3 - Selecione uma amostra de municípios segundo o esquema amostral que 
+###você escolheu em 2.
+
+sum(munic$Populacao)/5
+munic <- transform(munic,sqrtPop = sqrt(Populacao))
+munic <- munic[order(munic$sqrtPop),]
+sum(munic$sqrtPop)/5
+aux <- matrix(NA,nrow=nrow(munic),ncol=5)
+for(i in 1:5){
+aux[,i] <- cumsum(munic$sqrtPop) <= (sum(munic$sqrtPop)/5)*i
+}
+estrato <- 6-rowSums(aux)
+table(estrato)
+
+munic$estrato <- estrato
+munic.est <- split(munic,estrato)
+
+munic.amo <- list()
+for( i in 1:5){
+aux <- sample(1:nrow(munic.est[[i]]),40)
+munic.amo[[i]] <- munic.est[[i]][aux,]
+}
+
+amo.munic <- do.call(rbind,munic.amo)
+dim(amo.munic)
+str(amo.munic)
+
+#write.table(amo.munic,'c:/Projetos/TbAmoMunic/trunk/amo_Munic.dat',sep='\t',
+#            quote=F,row.names=F)
+url <- 'https://raw.github.com/leandromarino/TBAmoMunic/master/amo_Munic.dat'
+url <- getURL(url,ssl.verifypeer = FALSE)
+munic <- read.table(textConnection(url), colClasses='character',header=T,quote='',
+         sep='\t')
+str(munic)
+
+
+
+#################
+
+(Nest <- matrix(table(estrato),ncol=5))
+(N = sum(Nest))
+(nest <- rep(200/5,5))
+(Wh <- Nest/N)
+est.munic <- munic.amo
+estrato <- amo.munic$estrato
+
+#   a) Total de funcionários ativos da administração direta
+func <- split(amo.munic$FuncADMD,estrato)
+(tot.est <- do.call(c,lapply(func,sum)))
+(amop3a.tot <- sum(tot.est/nest*Nest))
+(var.intra <- do.call(c,lapply(func,var)))
+(amop3a.var <- N^2  * sum(Wh^2 * (1/nest - 1/Nest)*var.intra))
+(amop3a.cv <- sqrt(amop3a.var)/amop3a.tot)
+
+#   b) Razão da população por funcionário ativo da administração direta;
+func <- split(amo.munic$FuncADMD,estrato)
+pop <-  split(amo.munic$Populacao,estrato)
+#(amop3b.raz <- sum(amo.munic$Populacao)/sum(amo.munic$FuncADMD))
+(amop3b.raz <- sum(do.call(c,lapply(pop,sum))/40) / 
+               sum(do.call(c,lapply(func,sum))/40))
+(raz.est <- amop3b.raz)
+(medest <- do.call(c,lapply(func,mean)))
+(X <- sum(medest*Nest))
+(var.intraX <- do.call(c,lapply(func,var)))
+(var.intraY <- do.call(c,lapply(pop,var))) 
+(sd.intraX <- sqrt(var.intraX))
+(sd.intraY <- sqrt(var.intraY))
+cor.XY <- list()
+for(i in 1:5) cor.XY[[i]] <- cor(func[[i]],pop[[i]])
+(cor.XY <- do.call(c,cor.XY)) 
+(amop3b.var <- (1/X^2) * sum(Nest^2 * (1- fest)/nest * (var.intraY + 
+         raz.est^2*var.intraX - 2 * raz.est * sd.intraY * sd.intraX * cor.XY)))
+(amop3b.cv <- sqrt(amop3b.var)/amop3b.raz)
+
+
+#   c) Proporção de amo.municípios com maternidade;
+mater <- split(amo.munic$mater,estrato)
+(prop.est <- do.call(c,lapply(mater,mean)))
+(amop3c.prop <- sum(Wh*prop.est))
+(var.intra <- do.call(c,lapply(mater,var)))
+(amop3c.var <-  sum(Wh^2 * (1/nest - 1/Nest)*var.intra))
+(amop3c.cv <- sqrt(amop3c.var)/amop3c.prop)
+
+#   d) Proporção de amo.municípios com maternidade e emergência.
+materemerg <- split(amo.munic$materemerg,estrato)
+(prop.est <- do.call(c,lapply(materemerg,mean)))
+(amop3d.prop <- sum(Wh*prop.est))
+(var.intra <- do.call(c,lapply(materemerg,var)))
+(amop3d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
+(amop3d.cv <- sqrt(amop3d.var)/amop3d.prop)
+
