@@ -406,11 +406,27 @@ str(amo.munic)
 #            quote=F,row.names=F)
 url <- 'https://raw.github.com/leandromarino/TBAmoMunic/master/amo_Munic.dat'
 url <- getURL(url,ssl.verifypeer = FALSE)
-munic <- read.table(textConnection(url), colClasses='character',header=T,quote='',
+amo.munic <- read.table(textConnection(url), colClasses='character',header=T,quote='',
          sep='\t')
-str(munic)
+str(amo.munic)
+
+amo.munic <- transform(amo.munic,
+            Populacao=as.integer(Populacao),
+            FuncADMD=as.integer(FuncADMD),
+            Regiao=as.integer(Regiao),
+            mater = as.integer(mater),
+            emerg = as.integer(emerg),
+            materemerg = as.integer(materemerg),
+            sqrtPop = as.numeric(sqrtPop))
+amo.munic[1:10,]
+str(amo.munic)
 
 
+
+#####----------------------------------------------------------------------#####
+#####----------------------------------------------------------------------#####
+### ITEM 4 - De posse da amostra de municípios selecionada, estime os parâmetros 
+###de interesse e seus respectivos erros padrão e coeficientes de variação
 
 #################
 
@@ -465,4 +481,20 @@ materemerg <- split(amo.munic$materemerg,estrato)
 (var.intra <- do.call(c,lapply(materemerg,var)))
 (amop3d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
 (amop3d.cv <- sqrt(amop3d.var)/amop3d.prop)
+
+
+resumo.amo <- rbind(
+c(amop3a.tot ,sqrt(amop3a.var),amop3a.cv*100),
+c(amop3b.raz ,sqrt(amop3b.var),amop3b.cv*100),
+c(amop3c.prop,sqrt(amop3c.var),amop3c.cv*100),
+c(amop3d.prop,sqrt(amop3d.var),amop3d.cv*100))
+
+#write.xls(resumo.amo,'c:/Projetos/TbAmoMunic/trunk/resumo_amostra.xls')
+
+
+
+
+#####----------------------------------------------------------------------#####
+#####----------------------------------------------------------------------#####
+### ITEM 5 - PROPOSIÇÃO DE OUTRO PLANO AMOSTRAL - AAS COM PPT
 
