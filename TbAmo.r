@@ -100,6 +100,7 @@ n <- 200
 (p1a.tot <- sum(munic$FuncADMD))
 (p1a.cv <- sqrt(p1a.var)/p1a.tot)
 
+
 #   b) Razão da população por funcionário ativo da administração direta;
 med = mean(munic$FuncADMD)
 (p1b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
@@ -143,14 +144,6 @@ pop <-  split(munic$Populacao,estrato)
 (p2b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
 (raz.est <- do.call(c,lapply(pop,sum))/do.call(c,lapply(func,sum)))
 (medest <- do.call(c,lapply(func,mean)))
-#p2b.var <- list()
-#for( i in 1:5) {
-#p2b.var[[i]] <- (1-fest[i])/(nest[i]*medest[i]^2)*1/(Nest[i]-1)*
-#             sum((pop[[i]]-raz.est[i]*func[[i]])^2)
-#}
-#p2b.var <- do.call(c,p2b.var)
-#p2b.var <- sum(p2b.var)
-#(p2b.cv <- sqrt(p2b.var)/p2b.raz)
 (X <- sum(munic$FuncADMD))
 (var.intraX <- do.call(c,lapply(func,var)))
 (var.intraY <- do.call(c,lapply(pop,var))) 
@@ -168,7 +161,7 @@ for(i in 1:5) cor.XY[[i]] <- cor(func[[i]],pop[[i]])
 mater <- split(munic$mater,estrato)
 (prop.est <- do.call(c,lapply(mater,mean)))
 (p2c.prop <- sum(Wh*prop.est))
-(var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest))
+(var.intra <- do.call(c,lapply(mater,var)))
 (p2c.var <-  sum(Wh^2 * (1/nest - 1/Nest)*var.intra))
 (p2c.cv <- sqrt(p2c.var)/p2c.prop)   
 
@@ -176,7 +169,7 @@ mater <- split(munic$mater,estrato)
 materemerg <- split(munic$materemerg,estrato)
 (prop.est <- do.call(c,lapply(materemerg,mean)))
 (p2d.prop <- sum(Wh*prop.est))
-(var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest))
+(var.intra <- do.call(c,lapply(materemerg,var)))
 (p2d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
 (p2d.cv <- sqrt(p2d.var)/p2d.prop)   
 
@@ -221,14 +214,6 @@ pop <-  split(munic$Populacao,estrato)
 (p3b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
 (raz.est <- do.call(c,lapply(pop,sum))/do.call(c,lapply(func,sum)))
 (medest <- do.call(c,lapply(func,mean)))
-#p3b.var <- list()
-#for( i in 1:5) {
-#p3b.var[[i]] <- (1-fest[i])/(nest[i]*medest[i]^2)*1/(Nest[i]-1)*
-#             sum((pop[[i]]-raz.est[i]*func[[i]])^2)
-#}
-#p3b.var <- do.call(c,p3b.var)
-#p3b.var <- sum(p3b.var)
-#(p3b.cv <- sqrt(p3b.var)/p3b.raz)
 (X <- sum(munic$FuncADMD))
 (var.intraX <- do.call(c,lapply(func,var)))
 (var.intraY <- do.call(c,lapply(pop,var))) 
@@ -246,7 +231,7 @@ for(i in 1:5) cor.XY[[i]] <- cor(func[[i]],pop[[i]])
 mater <- split(munic$mater,estrato)
 (prop.est <- do.call(c,lapply(mater,mean)))
 (p3c.prop <- sum(Wh*prop.est))
-var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest)
+(var.intra <- do.call(c,lapply(mater,var)))
 (p3c.var <-  sum(Wh^2 * (1/nest - 1/Nest)*var.intra))
 (p3c.cv <- sqrt(p3c.var)/p3c.prop)
 
@@ -254,7 +239,7 @@ var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest)
 materemerg <- split(munic$materemerg,estrato)
 (prop.est <- do.call(c,lapply(materemerg,mean)))
 (p3d.prop <- sum(Wh*prop.est))
-var.intra <- ((Nest-nest)/(Nest-1)) * prop.est * (1-prop.est)*(1/nest)
+(var.intra <- do.call(c,lapply(materemerg,var)))
 (p3d.var <-  sum(Wh^2 * (1/nest - 1/Nest)* var.intra))
 (p3d.cv <- sqrt(p3d.var)/p3d.prop)
 
@@ -298,12 +283,13 @@ n <- nest
 (p4a.tot <- sum(munic$FuncADMD))
 (p4a.cv <- sqrt(p4a.var)/p4a.tot)
 
+(p4a.tot <- sum(munic$FuncADMD[aux]))
+(p4a.cv <- sqrt(p4a.var)/p4a.tot)
+
 #   b) Razão da população por funcionário ativo da administração direta;
 med = mean(munic$FuncADMD)
 (p4b.raz <- sum(munic$Populacao)/sum(munic$FuncADMD))
-
 (razao.est <- sum(munic$Populacao[aux])/sum(munic$FuncADMD[aux]))
-
 (p4b.var <- (1-f)/(n*med^2)*1/(N-1)*
          sum((munic$Populacao[aux]-razao.est*munic$FuncADMD[aux])^2))
 (p4b.cv <- sqrt(p4b.var)/p4b.raz)
@@ -325,13 +311,45 @@ med = mean(munic$FuncADMD)
 
 
 
+
+
+
+
 #######################
 ## Plano 5
 #######################
 
+N <- nrow(munic)
+n <- 200    
+(f <- n/N)
+
+(medX <- mean(munic$Populacao))
+X <- munic$Populacao
+Y <- munic$FuncADMD
+(R <- sum(Y)/sum(X))
+
+#   a) Total de funcionários ativos da administração direta
+(p5a.var <- N^2 * ((1-f)/n) * sum((Y - R*X)^2)*1/(N-1))
+(p5a.tot <- sum(munic$FuncADMD))
+(p5a.cv <- sqrt(p5a.var)/p5a.tot)
 
 
+#   b) Razão da população por funcionário ativo da administração direta;
+#Este cálculo não faz sentido.
 
+#   c) Proporção de municípios com maternidade;
+Y <- munic$mater
+(R <- sum(Y)/sum(X))
+(p5c.var <- ((1-f)/n) * sum((Y - R*X)^2)*1/(N-1))
+(p5c.tot <- mean(munic$mater))
+(p5c.cv <- sqrt(p5c.var)/p5c.tot)
+
+#   d) Proporção de municípios com maternidade e emergência.
+Y <- munic$materemerg
+(R <- sum(Y)/sum(X))
+(p5d.var <- ((1-f)/n) * sum((Y - R*X)^2)*1/(N-1))
+(p5d.tot <- mean(munic$materemerg))
+(p5d.cv <- sqrt(p5d.var)/p5d.tot)
 
 
 
@@ -341,3 +359,9 @@ resumo <- data.frame(plano = paste('Plano',1:5),
                      parametro_c=round(c(p1c.cv,p2c.cv,p3c.cv,p4c.cv,p5c.cv)*100,4),
                      parametro_d=round(c(p1d.cv,p2d.cv,p3d.cv,p4d.cv,p5d.cv)*100,4))
 resumo
+
+epas <- resumo[-1,]
+for(i in 1:4){
+epas[i,2:5] <- resumo[i+1,2:5] / resumo[1,2:5]
+}
+epas
